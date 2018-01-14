@@ -38,7 +38,7 @@ const ZAPI_PRGS     = '/zapi/smartbt/prgs';
  * @note more Support is on the way
  * @warning -
  */
-function Zeptrion(ip){
+function zApp(ip){
     self = this;
     this.ip = ip;
     this.ws_stat = WebSocket.CONNECTING;
@@ -53,18 +53,18 @@ function Zeptrion(ip){
 /**
  * Zeptrion.ws handlers
  */
-Zeptrion.prototype.ws_onclose   = function(code,reason){
+zApp.prototype.ws_onclose   = function(code,reason){
     self.ws_stat = WebSocket.CLOSED;
     console.log('WebSocket to '+self.ip+': closed; code: '+code+' ,reason: '+reason);
 };
-Zeptrion.prototype.ws_onerror   = function(error){
+zApp.prototype.ws_onerror   = function(error){
     self.ws_stat = WebSocket.CLOSED;
     console.log('WebSocket to '+self.ip+': error; .: '+error);
 };
-Zeptrion.prototype.ws_onmessage = function(data){
+zApp.prototype.ws_onmessage = function(data){
     console.log(data);
 };
-Zeptrion.prototype.ws_onopen    = function(){
+zApp.prototype.ws_onopen    = function(){
     self.ws_stat = WebSocket.OPEN;
     console.log('WebSocket to '+self.ip+': open');
 };
@@ -72,10 +72,10 @@ Zeptrion.prototype.ws_onopen    = function(){
 /**
  * Utility functions
  */
-Zeptrion.prototype.url = function(loc){
+zApp.prototype.url = function(loc){
     return 'http://'+this.ip+loc;
 }
-Zeptrion.prototype.request_opt = function(loc,method,body){
+zApp.prototype.request_opt = function(loc,method,body){
     return {
         url: this.url(loc),
         method: method,
@@ -83,7 +83,7 @@ Zeptrion.prototype.request_opt = function(loc,method,body){
         body: body
     };
 }
-Zeptrion.prototype.callback = function(error, response, body) {
+zApp.prototype.callback = function(error, response, body) {
     console.log('error:', error);
     console.log('statusCode:', response && response.statusCode);
     console.log('body:', body);
@@ -95,13 +95,13 @@ Zeptrion.prototype.callback = function(error, response, body) {
  * @warning hard_reset and network_reset will disconnect the device
  * @warning and will have to be mannualy reconnected
  */
-Zeptrion.prototype.reboot = function(){
+zApp.prototype.reboot = function(){
     request(this.request_opt(ZRAP_SYS,"POST",'cmd=reboot'),this.callback);
 }
-Zeptrion.prototype.hard_reset = function(){
+zApp.prototype.hard_reset = function(){
     request(this.request_opt(ZRAP_SYS,"POST",'cmd=factory-default'),this.callback);
 }
-Zeptrion.prototype.network_reset = function(){
+zApp.prototype.network_reset = function(){
     request(this.request_opt(ZRAP_SYS,"POST",'cmd=network-default'),this.callback);
 }
 
@@ -111,7 +111,7 @@ Zeptrion.prototype.network_reset = function(){
  * @param val values matching the channels
  * @note values from 0->49 are off and 50->100 are on
  */
-Zeptrion.prototype.set_channel = function(ch,val){
+zApp.prototype.set_channel = function(ch,val){
     if(ch.length != val.length) throw "Zeptrion.set_channel: Length missmatch";
     var msg = '';
     for(var i=0;i<ch.length;i++)
@@ -135,7 +135,7 @@ const BLACK   = '#000000';
 const YELLOW  = '#FFFF00';
 const MAGENTA = '#FF00FF';
 const CYAN    = '#00FFFF';
-Zeptrion.prototype.set_led = function(led,col){
+zApp.prototype.set_led = function(led,col){
     if(led.length != col.length) throw "Zeptrion.set_led: Length missmatch";
     var msg = '[';
     for(var i=0;i<led.length;i++)
@@ -149,14 +149,14 @@ Zeptrion.prototype.set_led = function(led,col){
  * @param btn button to set or clear from 1 - 9
  * @param val value of the button 0 or 1
  */
-Zeptrion.prototype.set_button = function(btn,val){
+zApp.prototype.set_button = function(btn,val){
     if((btn < 1 )||(btn > 9)) throw "Zeptrion.set_button: Button out of range";
     var x = '{"pid2":{"bta":"........."}}';
     if(val==1){x=x.substring(0, 15+btn)+'P'+x.substring(btn+16);}
     this.ws.send(x);
 }
 
-module.exports = Zeptrion;
+module.exports = zApp;
 
 /******************************************************************************
  ******************************************************************************
@@ -164,7 +164,7 @@ module.exports = Zeptrion;
  ******************************************************************************
  ******************************************************************************/
 function test(){
-    var z = new Zeptrion("192.168.1.132");
+    var z = new zApp("192.168.1.132");
     try{
         z.set_led([1],['#FF00FF']);
         z.set_led([2,3,4],['#FFFF00','#00FFFF','#00FFFF']);
